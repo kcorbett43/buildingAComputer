@@ -1,0 +1,71 @@
+class Ship {
+
+	field int x, y;
+	field int size;
+
+	constructor Ship new(int set_x, int set_y, int set_size) {
+        // Sets the top left (x,y) coordinate of a Rectangle.
+		let x = set_x;
+		let y = set_y;
+		let size = set_size;
+
+		do drawShip();
+		return this;
+	}
+
+	method void dispose() {
+        // Deallocates memory of the ship.
+		do Memory.deAlloc(this);
+		return;
+	}
+
+    method void setXY(int set_x, int set_y) {
+        // Sets an (x,y) coordinate for the ship.
+        let x = set_x;
+        let y = set_y;
+        return;
+    }
+
+    method int getX() {
+        return x;
+    }
+
+    method int getY() {
+        return y;
+    }
+
+    method int getSize() {
+        return size;
+    }
+
+	method void drawShip() {
+		do Screen.drawRectangle(x, y, x+size, y+size);
+		return;
+	}
+
+	method void moveRight() {
+        // Causes the ship to move right. 
+        if ((x + size) < 510) {
+            do Screen.setColor(false);
+            do Screen.drawRectangle(x, y, x + 1, y + size);
+            let x = x + 2;
+            do Screen.setColor(true);
+            do Screen.drawRectangle((x + size) - 1, y, x + size, y + size);
+        }
+        return;
+    }
+
+    method void moveLeft() {
+        // Causes ship to move to the left.
+        if (x > 1) {
+            do Screen.setColor(false);
+            do Screen.drawRectangle((x + size) - 1, y, x + size, y + size);
+            let x = x - 2;
+            do Screen.setColor(true);
+            do Screen.drawRectangle(x, y, x + 1, y + size);
+        }
+        return;
+    }
+
+	
+}

@@ -1,0 +1,63 @@
+class Drop {
+
+	field int x, y;
+	field int size;
+
+	constructor Drop new(int set_x, int set_y, int set_size) {
+        // Sets the start location of a drop.
+		let x = set_x;
+		let y = set_y;
+		let size = set_size;
+
+		do drawDrop();
+		return this;
+	}
+
+	method void dispose() {
+        // Deallocates drop memory.
+		do Memory.deAlloc(this);
+		return;
+	}
+
+    method int getX() {
+        return x;
+    }
+
+    method int getY() {
+        return y;
+    }
+
+    method int getSize() {
+        return size;
+    }
+
+    method void drawDrop() {
+		do Screen.drawCircle(x, y, size);
+		return;
+	}
+
+    method void moveDown(int speed) {
+        // Causes the drop to fall.
+        if ((y + size) < 254) {
+            do Screen.setColor(false);
+            do Screen.drawCircle(x, y, size);
+            let y = y + speed;
+            do Screen.setColor(true);
+            do Screen.drawCircle(x, y, size);
+        }
+        return;
+    }
+
+    function void moveAllDown(Array drops, int num_drops) {
+        // Causes a group of drops to fall.
+        var Drop drop;
+        
+        while (num_drops > -1) {
+            let drop = drops[num_drops];
+            do drop.moveDown(1);
+            let num_drops = num_drops - 1;
+        }
+        return;
+    }
+
+}

@@ -1,0 +1,224 @@
+class Game {
+
+	field Ship ship;
+
+	constructor Game new() {
+		return this;
+	}
+
+	method void run() {
+		var boolean is_running;    // Main game loop.
+		var boolean has_started;   // Determines whether to start a new loop.
+		var char key;              
+		var int seed;
+		var int ship_direction;
+		var int rand_x;
+		var Array drops;
+		var int drop_pointer;
+		var int num_drops;
+		var int round;
+		var int round_drops;
+		var Drop drop;
+		var boolean has_collided;
+		var boolean is_new_round;
+		var boolean round_ended;
+
+		let round_ended = false;
+		let is_new_round = true;
+		let is_running = true;
+		let has_started = false;
+		do Output.printString("Press Enter To Start!");
+		
+		// Allows user to start the round and sets the random seed.
+		while (~has_started) {
+			let seed = seed + 1;
+			let key = Keyboard.keyPressed();
+			if (key = 128) {
+                let has_started = true;
+            }
+		}
+		do Random.setSeed(seed);
+		do Screen.clearScreen();
+
+		do Screen.drawRectangle(1,1,20,254);
+		do Screen.drawRectangle(490, 1, 510, 254);
+
+		let ship = Ship.new(240,230,10);
+		let drops = Array.new(30);
+		let drop_pointer = 0;
+		let num_drops = 1;
+		let round_drops = num_drops;
+		let round = 1;
+		let key = 0;
+		let ship_direction = 1;
+
+		// Begins the round with the ship moving right.
+		// The ship should always be in motion.
+		do ship.moveRight();
+
+		// Main game loop.
+		while (is_running) {
+            let key = Keyboard.keyPressed();
+
+			// If its a new round, reintialize starting variables.
+			if (is_new_round) {
+				do Screen.drawRectangle(1,1,20,254);
+				do Screen.drawRectangle(490, 1, 510, 254);
+
+				while ( num_drops > -1 ) {
+					let rand_x = Random.randTwoRange(20, 480);
+					let drop = Drop.new(rand_x,10,10);
+					let drops[num_drops] = drop;
+					let num_drops = num_drops - 1;
+				}
+				let is_new_round = false;
+			}
+
+			// Move left.
+			if ( ( key = 130 ) | ( ship_direction = 2 ) ) {
+				do ship.moveLeft();
+				let ship_direction = 2;
+			}
+
+			// Move right.
+			if ( ( key = 132 ) | ( ship_direction = 1 ) ) {
+				do ship.moveRight();
+				let ship_direction = 1;
+			}
+
+			// Cause the drops to fall.
+			do Drop.moveAllDown(drops, round_drops);
+
+
+			// Win the game if you make it past round 8.
+			if (round_drops > 8) {
+				do Screen.clearScreen();
+				do Output.printString("Congratulations! You've Won! ");
+				let has_started = false;
+				do Output.printString("Press Enter To Start A New Game.");
+				while (~has_started) {
+					let key = Keyboard.keyPressed();
+					if (key = 128) {
+						let has_started = true;
+					}
+				}
+				let round = 1;
+				let is_new_round = true;
+				let num_drops = 1;
+				let round_drops = num_drops;
+				do Screen.clearScreen();
+			}
+
+
+			// Determines whether the round has ended.
+			let round_ended = Game.checkRoundEnded(drops, round_drops);
+			if (round_ended & ( round_drops < 9 ) ) {
+				do Screen.clearScreen();
+				do Output.printString("Round "); 
+				do Output.printInt(round);
+				do Output.printString(" Complete!");
+				do Output.println();
+				do Output.printString("Press Enter To Begin Round ");
+				do Output.printInt(round+1);
+				let has_started = false;
+				let round_ended = false;
+				let round = round + 1;
+				while (~has_started) {
+					let seed = seed + 1;
+					let key = Keyboard.keyPressed();
+					if (key = 128) {
+						let has_started = true;
+					}
+				}
+				let is_new_round = true;
+				
+				// Increase new drops by two for beginning rounds, and by
+				// one afterwards.
+				if ( round < 3 ) {
+					let num_drops = round_drops + 2;
+				} else {
+					let num_drops = round_drops + 1;
+				}
+				let round_drops = num_drops;
+				do Screen.clearScreen();
+			} else {
+				// If the round has not ended, check whether the ship has collided with anything.
+				let has_collided = Game.checkCollision(ship, drops, round_drops);
+				if ( has_collided ) {
+					do Screen.clearScreen();
+					do Output.printString("GAME OVER");
+					do Output.println();
+					do Output.printString("You Made It To Round ");
+					do Output.printInt(round);
+					do Output.println();
+					do Output.printString("Press Enter To Start A New Game.");
+					let has_started = false;
+					while (~has_started) {
+						let key = Keyboard.keyPressed();
+						if (key = 128) {
+							let has_started = true;
+						}
+					}
+					let round = 1;
+					let is_new_round = true;
+					let num_drops = 1;
+					let round_drops = num_drops;
+					do Screen.clearScreen();
+					do ship.setXY(240,230);
+				}
+			}
+
+			do Sys.wait(5);
+		}
+
+		return;
+	}
+
+	function boolean checkCollision(Ship ship, Array drops, int round_drops) {
+		// Checks to see if the ship has hit the walls or any of the drops.
+		var Drop drop;
+		var int drop_x;
+		var int drop_y;
+		var int drop_radius;
+		var int ship_x;
+		var int ship_y;
+		var int ship_size;
+
+		// Has the ship hit the walls?
+		if ( ( ship.getX() < 20 ) | ( ( ship.getX() + ship.getSize() ) > 490 ) ) {
+			return true;
+		}
+
+		// Has the ship hit a drop?
+		while ( round_drops > -1 ) {
+			let drop = drops[round_drops];
+			if ( ( ( drop.getY() + drop.getSize() ) > ship.getY() ) & ( ( ( drop.getX() + drop.getSize() ) > ship.getX() ) & ( ( drop.getX() - drop.getSize() ) < ( ( ship.getX() + ship.getSize() ) ) ) ) ) {
+				return true;
+			}
+			let round_drops = round_drops - 1;
+		}
+
+		return false;
+	}
+
+	function boolean checkRoundEnded(Array drops, int round_drops) {
+		// Determines whether to go on to the next round.
+		// Round ends when all drops have gone all the way down.
+		var Drop drop;
+
+		while (round_drops > -1) {
+			let drop = drops[round_drops];
+			if (drop.getY() < 240) {
+				return false;
+			}
+			let round_drops = round_drops - 1;
+		}
+		return true;
+	}
+
+	method void dispose() {
+		do ship.dispose();
+		do Memory.deAlloc(this);
+		return;
+	}
+}
