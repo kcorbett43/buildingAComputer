@@ -25,7 +25,7 @@ It defines:
 
 ---
 
-### ⚙️ `CustomAssembler/`
+### `CustomAssembler/`
 Converts Hack Assembly (`.asm`) programs into binary machine code understood by the Hack Virtual Machine.  
 It handles:
 - Parsing instructions and symbolic labels  
@@ -56,3 +56,4 @@ It demonstrates:
 
 ### Acknowledgements
 This was built during the Introduction to Computer Systems course at UChicago.
+
